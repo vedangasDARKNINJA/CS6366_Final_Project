@@ -24,7 +24,7 @@ void main()
 {
     // Gamma Correction
     float gamma = 2.2;
-    //float gamma = 1.0;
     vec4 result = texture(uScreenTexture,vTexCoords);
     FragColor = vec4(pow(result.rgb,vec3(1.0/gamma)),1.0);
+    //FragColor = vec4(result.rgb,1.0);
 }

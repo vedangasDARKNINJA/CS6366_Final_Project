@@ -10,9 +10,12 @@ namespace RendererPBR
 		virtual const char* GetName()const override { return "Light"; }
 		virtual unsigned int GetRenderMode() const override;
 
-		void SetColor(glm::vec3 lightColor);
-		glm::vec4 GetColor()const;
-	private:
-		glm::vec3 m_LightColor;
+
+		virtual void OnImGuiDraw()override;
+
+		glm::vec3 Ambient;
+		glm::vec3 Diffuse;
+		glm::vec3 Specular;
+
 	};
 }

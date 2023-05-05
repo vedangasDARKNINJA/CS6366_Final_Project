@@ -5,10 +5,15 @@
 #include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
 
+#include <imgui.h>
+#include <misc/cpp/imgui_stdlib.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 namespace RendererPBR
 {
 	Light::Light()
-		:m_LightColor(1.0f)
+		:Ambient(0.05f),Diffuse(0.5f),Specular(1.0f)
 	{
 		static const float vertices[] =
 		{
@@ -40,18 +45,15 @@ namespace RendererPBR
 		m_IndexBuffer->Unbind();
 	}
 
-	void Light::SetColor(glm::vec3 lightColor)
-	{
-		m_LightColor = lightColor;
-	}
-
-	glm::vec4 Light::GetColor() const
-	{
-		return glm::vec4(m_LightColor,1.0f);
-	}
-
 	unsigned int Light::GetRenderMode() const
 	{
 		return GL_TRIANGLE_STRIP;
+	}
+
+	void Light::OnImGuiDraw()
+	{
+		ImGui::ColorEdit3("Ambient", &Ambient[0]);
+		ImGui::ColorEdit3("Diffuse", &Diffuse[0]);
+		ImGui::ColorEdit3("Specular", &Specular[0]);
 	}
 }

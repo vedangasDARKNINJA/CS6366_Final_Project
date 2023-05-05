@@ -14,6 +14,7 @@ list(APPEND INCLUDE_PATHS
                 "${CMAKE_SOURCE_DIR}/vendor/GLFW/include"
                 "${CMAKE_SOURCE_DIR}/vendor/glad/include"
                 "${CMAKE_SOURCE_DIR}/vendor/glm"
+                "${CMAKE_SOURCE_DIR}/vendor/assimp/include"
                 "${CMAKE_SOURCE_DIR}/vendor/stb_image/"
                 "${CMAKE_SOURCE_DIR}/vendor/imgui"
                 "${CMAKE_SOURCE_DIR}/vendor/imgui/backends")
@@ -72,12 +73,14 @@ target_sources(
             FBQuad.cpp
             ${PROJECT_INCLUDE_PATH}/PrimitiveSphere.hpp
             PrimitiveSphere.cpp
+            ${PROJECT_INCLUDE_PATH}/AssimpModel.hpp
+            AssimpModel.cpp
             ${PROJECT_INCLUDE_PATH}/Light.hpp
             Light.cpp
 
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw3 glad glm imgui)
+target_link_libraries(${PROJECT_NAME} PRIVATE glfw glad glm imgui assimp)
 
 target_link_directories(${PROJECT_NAME} PRIVATE ${LIBRARY_OUTPUT_PATH})
 

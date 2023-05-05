@@ -16,6 +16,7 @@
 #include "Renderbuffer.hpp"
 #include "TestQuad.hpp"
 #include "FBQuad.hpp"
+#include "AssimpModel.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -30,10 +31,12 @@
 namespace RendererPBR
 {
 	Light* light = nullptr;
-	Shader* textureShader = nullptr;
-	Texture* whiteTexture = nullptr;
-	PrimitiveSphere* sphere = nullptr;
+	AssimpModel* sphere = nullptr;
 	TestQuad* quad = nullptr;
+
+	Shader* textureShader = nullptr;
+	Shader* pbrDirectLighting = nullptr;
+	Shader* pbrImageBasedLighting = nullptr;
 
 	Framebuffer* framebuffer = nullptr;
 	Renderbuffer* renderbuffer = nullptr;
@@ -44,6 +47,10 @@ namespace RendererPBR
 	// PBR Textures
 	Texture* diffuseTexture = nullptr;
 	Texture* specularTexture = nullptr;
+	Texture* metallicTexture = nullptr;
+	Texture* normalMapTexture = nullptr;
+	Texture* roughnessMapTexture = nullptr;
+	Texture* aoMapTexture = nullptr;
 
 	Application::Application()
 	{
@@ -63,13 +70,18 @@ namespace RendererPBR
 	Application::~Application()
 	{
 		delete sphere;
-		delete textureShader;
-		delete whiteTexture;
-		delete light;
 		delete quad;
+		delete light;
+		delete textureShader;
+		delete pbrDirectLighting;
+		delete pbrImageBasedLighting;
 
 		delete diffuseTexture;
 		delete specularTexture;
+		delete normalMapTexture;
+		delete metallicTexture;
+		delete roughnessMapTexture;
+		delete aoMapTexture;
 
 		delete framebuffer;
 		delete renderbuffer;
@@ -109,19 +121,25 @@ namespace RendererPBR
 			__debugbreak();
 		}
 
-		diffuseTexture = new Texture("data/textures/albedo.png");
-		specularTexture = new Texture("data/textures/roughness.png");
+		pbrDirectLighting = new Shader("data/shaders/PBR_direct.shader");
+		if (!pbrDirectLighting->WasCompilationSuccessful())
+		{
+			__debugbreak();
+		}
 
-		unsigned char data[] = { 0xFF, 0xFF, 0xFF, 0xFF };
-		whiteTexture = new Texture(1, 1, 4, data);
+		diffuseTexture = new Texture("data/textures/albedo.png", true);
+		specularTexture = new Texture("data/textures/height.png");
+		normalMapTexture = new Texture("data/textures/normals.png");
+		metallicTexture = new Texture("data/textures/metallic.png");
+		roughnessMapTexture = new Texture("data/textures/roughness.png");
+		aoMapTexture = new Texture("data/textures/ao.png");
 
 		light = new Light();
-		light->transform.SetPosition({ 2.0f, 1.5f, 0.5f });
-		light->SetColor({ 0.988f, 0.655f, 0.337f });
+		light->transform.SetPosition({ 1.5f, 2.0f, 1.0f });
 
+		sphere = new AssimpModel("data/models/sphere.obj");
 		quad = new TestQuad();
-
-		sphere = new PrimitiveSphere();
+		quad->transform.SetRotation({ 60.0f, 0.0f, 0.0f });
 
 		framebuffer = new Framebuffer();
 		const unsigned int width = m_Window->GetWindowWidth(), height = m_Window->GetWindowHeight();
@@ -153,6 +171,37 @@ namespace RendererPBR
 		std::cout << "FB Status: " << framebuffer->IsComplete() << std::endl;
 
 		Mesh* currentMesh = sphere;
+		Shader* currentShader = textureShader;
+
+		static const char* modelNames[] = { "Sphere", "Quad" };
+		static const char* currentModelName = modelNames[0];
+		static Mesh* const models[] = { sphere, quad };
+
+		static const char* shaderNames[] = { "Texture Shader", "PBR Direct Lighting" };
+		static const char* currentShaderName = shaderNames[0];
+		static Shader* const shaders[] = { textureShader, pbrDirectLighting };
+
+		static glm::vec3 lightOffsets[4] = {
+			glm::vec3(0.0f,0.5f,0.5f),
+			glm::vec3(0.0f,-0.5f,0.5f),
+			glm::vec3(0.0f,0.5f,-0.5f),
+			glm::vec3(0.0f,-0.75f,-0.5f),
+		};
+
+		static glm::vec3 lightPositions[4] = {
+			glm::vec3(-1.0f,1.0f,0.5f),
+			glm::vec3(2.0f,1.5f,1.5f),
+			glm::vec3(-1.0f,1.1f,1.5f),
+			glm::vec3(0.5f,-1.0f,1.0f),
+		};
+
+		static glm::vec3 lightColors[4] = {
+			glm::vec3(1.0f,1.0f,1.0f),
+			glm::vec3(1.0f,0.0f,1.0f),
+			glm::vec3(0.68f,0.68f,0.68f),
+			glm::vec3(0.0f,1.0f,1.0f),
+		};
+
 		while (m_IsRunning && m_Window->IsWindowOpen())
 		{
 			prevFrameTime = currFrameTime;
@@ -167,20 +216,40 @@ namespace RendererPBR
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			/*
-			texture1->Bind(1);
-			textureShader->SetUniformMatrix4f("uModel", currentMesh->transform.GetModelMatrix());
-			textureShader->SetUniformMatrix4f("uProjection", orbitCamera->GetProjection());
-			textureShader->SetUniformMatrix4f("uView", orbitCamera->GetView());
-			textureShader->SetUniformVec4("uTint", glm::vec4(1.0f));
-			textureShader->SetUniformInt("uAlbedo", 1);
 
-			// Lighting
-			textureShader->SetUniformVec3("uViewPos", orbitCamera->GetViewPosition());
-			textureShader->SetUniformVec3("uLightPos", light->transform.GetPosition());
-			textureShader->SetUniformVec3("uLightColor", light->GetColor());
-			*/
-			m_Renderer->Render(currentMesh, textureShader, light, orbitCamera, diffuseTexture, specularTexture);
+			if (currentShader == textureShader)
+			{
+				m_Renderer->Render(currentMesh, currentShader, light, orbitCamera,
+					diffuseTexture, specularTexture, normalMapTexture);
+			}
+			else
+			{
+
+				const int rows = 7;
+				const int cols = 7;
+				const float spacing = 2.5f;
+
+				// render grid of spheres with varying metallic/roughness values scaled by rows and columns respectively
+				glm::mat4 model = glm::mat4(1.0f);
+				for (int row = 0; row < rows; ++row)
+				{
+					currentShader->SetUniformFloat("uMetallic", (float)row / (float)rows, true);
+					for (int col = 0; col < cols; ++col)
+					{
+						currentShader->SetUniformFloat("uRoughness", glm::clamp((float)col / (float)cols , 0.05f, 1.0f), true);
+						glm::vec3 positionOffset((col - (cols / 2)) * spacing, (row - (rows / 2)) * spacing, 0.0f);
+						currentMesh->transform.SetPosition(positionOffset);
+						for (int i = 0; i < 4; ++i)
+						{
+							lightOffsets[i] = lightPositions[i] + positionOffset;
+						}
+						currentShader->SetUniformVec3Array("uLightPositions", &lightOffsets[0][0], 4);
+						currentShader->SetUniformVec3Array("uLightColors", &lightColors[0][0], 4);
+						m_Renderer->Render(currentMesh, currentShader, light, orbitCamera,
+							diffuseTexture, metallicTexture, normalMapTexture, roughnessMapTexture, aoMapTexture);
+					}
+				}
+			}
 
 			framebuffer->Unbind();
 			glDisable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
@@ -190,6 +259,26 @@ namespace RendererPBR
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			m_ImGuiSubsystem->NewFrame();
+			currentShader->OnImGuiDraw();
+			ImGui::Begin("Lights");
+			{
+				if (currentShader == textureShader)
+				{
+					light->OnImGuiDraw();
+				}
+				else
+				{
+					for (int i = 0; i < 4; ++i)
+					{
+						std::string label = "LightPosition" + i;
+						std::string color = "LightColor" + i;
+						ImGui::DragFloat3(label.c_str(), &lightPositions[i][0]);
+						ImGui::ColorEdit3(color.c_str(), &lightColors[i][0]);
+						ImGui::Dummy(ImVec2(0.0f, 2.0f));
+					}
+				}
+			}
+			ImGui::End();
 
 			ImGui::Begin("Inspector");
 			{
@@ -200,6 +289,44 @@ namespace RendererPBR
 				if (ImGui::Checkbox("Wireframe Mode", &wireFrame))
 				{
 					m_Renderer->SetWireFrame(wireFrame);
+				}
+
+				ImGui::SeparatorText("Models");
+				if (ImGui::BeginCombo("Rendering Model", currentModelName))
+				{
+					for (int n = 0; n < IM_ARRAYSIZE(modelNames); n++)
+					{
+						bool is_selected = (currentModelName == modelNames[n]);
+						if (ImGui::Selectable(modelNames[n], &is_selected))
+						{
+							currentModelName = modelNames[n];
+							currentMesh = models[n];
+							if (is_selected)
+							{
+								ImGui::SetItemDefaultFocus();
+							}
+						}
+					}
+					ImGui::EndCombo();
+				}
+
+				ImGui::SeparatorText("Shaders");
+				if (ImGui::BeginCombo("Current Shader", currentShaderName))
+				{
+					for (int n = 0; n < IM_ARRAYSIZE(shaderNames); n++)
+					{
+						bool is_selected = (currentShaderName == shaderNames[n]);
+						if (ImGui::Selectable(shaderNames[n], &is_selected))
+						{
+							currentShaderName = shaderNames[n];
+							currentShader = shaders[n];
+							if (is_selected)
+							{
+								ImGui::SetItemDefaultFocus();
+							}
+						}
+					}
+					ImGui::EndCombo();
 				}
 			}
 			ImGui::End();

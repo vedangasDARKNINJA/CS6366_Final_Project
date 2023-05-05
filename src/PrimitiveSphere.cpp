@@ -1,7 +1,6 @@
 #include "PrimitiveSphere.hpp"
 #include <vector>
 
-#include "Shader.hpp"
 #include "VertexBuffer.hpp"
 #include "IndexBuffer.hpp"
 #include "VertexArray.hpp"
@@ -19,14 +18,17 @@ namespace RendererPBR
 		/*
 		* Code from: http://www.songho.ca/opengl/gl_sphere.html
 		*/
-		std::vector<float> data;
+		std::vector<float> vertices;
 		std::vector<unsigned int> indices;
 
 		float x, y, z, xy;                              // vertex position
 		float nx, ny, nz, lengthInv = 1.0f / radius;    // normal
 		float s, t;                                     // texCoord
 
-		const float divisionInv = 1.0f / divisions;
+		const float tilingX = 4.0f;
+		const float tilingY = 2.0f;
+
+		const float divisionInv = 1.0f /  divisions;
 		const float ringsInv = 1.0f / rings;
 		constexpr const float PI = glm::radians(180.0f);
 		float sectorStep = glm::radians(360.0f / divisions);
@@ -48,23 +50,23 @@ namespace RendererPBR
 				// vertex position
 				x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
 				y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
-				data.push_back(x);
-				data.push_back(y);
-				data.push_back(z);
+				vertices.push_back(x);
+				vertices.push_back(y);
+				vertices.push_back(z);
 
 				// normalized vertex normal
 				nx = x * lengthInv;
 				ny = y * lengthInv;
 				nz = z * lengthInv;
-				data.push_back(nx);
-				data.push_back(ny);
-				data.push_back(nz);
+				vertices.push_back(nx);
+				vertices.push_back(ny);
+				vertices.push_back(nz);
 
 				// vertex tex coord between [0, 1]
-				s = (float)j * divisionInv;
-				t = (float)i * ringsInv;
-				data.push_back(s);
-				data.push_back(t);
+				s = (float)tilingX * j * divisionInv;
+				t = (float)tilingY * i * ringsInv;
+				vertices.push_back(s);
+				vertices.push_back(t);
 			}
 		}
 
@@ -92,14 +94,13 @@ namespace RendererPBR
 		m_VertexArray = new VertexArray();
 		m_VertexArray->Bind();
 
-		VertexBuffer vb(data.data(), data.size());
+		VertexBuffer vb(vertices.data(), vertices.size());
 		m_IndexBuffer = new IndexBuffer(indices.data(), indices.size());
 
 		VertexBufferLayout layout;
 		layout.Push<float>(3); // Position
 		layout.Push<float>(3); // Normals
 		layout.Push<float>(2); // Tex Coordinates
-
 
 		m_VertexArray->AddBuffer(vb, layout);
 

@@ -17,16 +17,19 @@ namespace RendererPBR
 	void Transform::SetPosition(glm::vec3 position)
 	{
 		m_Translation = position;
+		m_IsDirty = true;
 	}
 
 	void Transform::SetScale(glm::vec3 scale)
 	{
 		m_Scale = scale;
+		m_IsDirty = true;
 	}
 
 	void Transform::SetRotation(glm::vec3 eulerAngles)
 	{
 		m_EulerAngles = eulerAngles;
+		m_IsDirty = true;
 	}
 
 	void Transform::OnImGuiDraw(const char* label)

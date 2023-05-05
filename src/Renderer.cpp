@@ -95,24 +95,52 @@ namespace RendererPBR
 		glDrawElements(mesh->GetRenderMode(), ib->GetCount(), GL_UNSIGNED_INT, 0);
 	}
 
-	void Renderer::Render(Mesh* mesh, Shader* shader, Light* light, Camera* camera, Texture* diffuse, Texture* specular)
+	void Renderer::Render(Mesh* mesh, Shader* shader, Light* light, Camera* camera, 
+		Texture* diffuse, Texture* specular, Texture* normalMap)
 	{
-		diffuse->Bind(1);
-		specular->Bind(2);
+		diffuse->Bind(0);
+		specular->Bind(1);
+		normalMap->Bind(2);
 
 		shader->SetUniformMatrix4f("uModel", mesh->transform.GetModelMatrix());
 		shader->SetUniformMatrix4f("uProjection", camera->GetProjection());
 		shader->SetUniformMatrix4f("uView", camera->GetView());
 
-		shader->SetUniformInt("uMaterial.diffuse", 1);
-		shader->SetUniformInt("uMaterial.specular", 2);
-		shader->SetUniformFloat("uMaterial.shininess", 64.0f);
+		shader->SetUniformInt("uMaterial.diffuse", 0);
+		shader->SetUniformInt("uMaterial.specular", 1);
+		shader->SetUniformInt("uMaterial.normalMap", 2);
+		shader->SetUniformFloat("uMaterial.shininess", 32.0f);
 
-		shader->SetUniformVec3("uLight.ambient", 0.2f, 0.2f, 0.2f);
-		shader->SetUniformVec3("uLight.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
-		shader->SetUniformVec3("uLight.specular", 1.0f, 1.0f, 1.0f);
-		shader->SetUniformVec3("uLight.position", light->transform.GetPosition());
-		shader->SetUniformVec3("uViewPos", camera->GetViewPosition());
+		shader->SetUniformVec3("uLight.ambient", light->Ambient);
+		shader->SetUniformVec3("uLight.diffuse", light->Diffuse); // darken diffuse light a bit
+		shader->SetUniformVec3("uLight.specular", light->Specular);
+
+		shader->SetUniformVec3("uLightPosition", light->transform.GetPosition());
+		shader->SetUniformVec3("uCameraPosition", camera->GetViewPosition());
+
+		Render(mesh, shader);
+	}
+
+	void Renderer::Render(Mesh* mesh, Shader* shader, Light* light, Camera* camera, 
+		Texture* albedoMap, Texture* metallicMap, Texture* normalMap, Texture* roughnessMap, Texture* aoMap)
+	{
+		albedoMap->Bind(0);
+		metallicMap->Bind(1);
+		normalMap->Bind(2);
+		roughnessMap->Bind(3);
+		aoMap->Bind(4);
+
+		shader->SetUniformMatrix4f("uModel", mesh->transform.GetModelMatrix());
+		shader->SetUniformMatrix4f("uProjection", camera->GetProjection());
+		shader->SetUniformMatrix4f("uView", camera->GetView());
+
+		shader->SetUniformInt("uAlbedoMap", 0);
+		shader->SetUniformInt("uMetallicMap", 1);
+		shader->SetUniformInt("uNormalMap", 2);
+		shader->SetUniformInt("uRoughnessMap", 3);
+		shader->SetUniformInt("uAOMap", 4);
+
+		shader->SetUniformVec3("uCameraPosition", camera->GetViewPosition());
 
 		Render(mesh, shader);
 	}
