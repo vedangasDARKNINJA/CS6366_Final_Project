@@ -112,12 +112,4 @@ void main()
     float attenuation = 1.0 / (distance * distance);
     vec3 result = ambient + (diffuse + specular) * attenuation;
     FragColor = vec4(result, 1.0);
-
-    /*
-    vec3 normal = texture(uMaterial.normalMap, v2f.vTexCoords).rgb;
-    normal = normalize(normal * 2.0 - 1.0);
-    //FragColor = vec4(normal,1.0);
-
-    //FragColor = vec4(specular,1.0);
-    */
 }
