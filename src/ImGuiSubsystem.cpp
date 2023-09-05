@@ -1,11 +1,13 @@
 #include "ImGuiSubsystem.hpp"
 #include <iostream>
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #include <imgui.h>
-#include <misc/cpp/imgui_stdlib.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+#include <imgui_impl_opengl3.cpp>
+#include <imgui_impl_glfw.cpp>
 
 namespace RendererPBR
 {
