@@ -3,22 +3,22 @@
 ## Blinn Phong Lighting:
 
 Implemented a basic lighting using blinn phong model.
-![Blinn Phong](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/tree/master/images/Blinn-Phong.png)
+![Blinn Phong](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/blob/master/images/Blinn-Phong.png)
 
 ## Camera Settings:
 
 Added an orbit camera with configuration exposed in the application through Dear imgui.
-![Camera imgui](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/tree/master/images/CameraImGUI.png)
+![Camera imgui](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/blob/master/images/CameraImGUI.png)
 
 ## Physically Based Rendering(PBR):
 
-![RedCloseUp](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/tree/master/images/PBR_Red_CloseUp.png)
+![RedCloseUp](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/blob/master/images/PBR_Red_CloseUp.png)
 
-![Red](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/tree/master/images/PBR_Red.png)
+![Red](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/blob/master/images/PBR_Red.png)
 
-![Textured_CloseUp](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/tree/master/images/PBR_Textured_CloseUp.png)
+![Textured_CloseUp](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/blob/master/images/PBR_Textured_CloseUp.png)
 
-![Textured_Textured](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/tree/master/images/PBR_Textured.png)
+![Textured_Textured](https://github.com/vedangasDARKNINJA/CS6366_Final_Project/blob/master/images/PBR_Textured.png)
 
 # Generate Project Files
 
